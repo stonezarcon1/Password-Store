@@ -3,6 +3,7 @@ class PasswordDatabase {
     public static final String MYSQL_LOGIN = "myuser"; //change this to match your personal mysql server
     public static final String MYSQL_PASSWORD = "xxxx"; //change this to match your personal mysql server
     private static final String MYSQL_DIRECTORY = "\\myWebProject\\mysql\\bin"; //change to your personal mysql directory
+
     public static void main(String[] args){
         try
         {
@@ -44,8 +45,6 @@ class PasswordDatabase {
 
             Statement stmt = con.createStatement();
             String strSelect = "select * from " + LoginArea.currentUser;
-            //TODO
-            //replace 'userpasswords' with logged in user.
 
             ResultSet rset = stmt.executeQuery(strSelect);
             int i = 0;

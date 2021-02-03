@@ -18,6 +18,7 @@ import java.util.Base64;
 public class Register extends JFrame {
     //JFrame for allowing new users to register their info
     protected static JButton registerButton;
+    protected static JButton goBackButton;
     protected static JTextArea usernameArea; //these fields are here to be accessed by listener class
     protected static JTextArea passwordArea;
     protected static JTextArea confirmPasswordArea;
@@ -33,7 +34,7 @@ public class Register extends JFrame {
 
         //creating components for the frame
         JLabel loginLabel = new JLabel("Enter your new account credentials.");
-        loginLabel.setBounds(5, 5, 200, 20);
+        loginLabel.setBounds(5, 5, 250, 20);
 
         JLabel username = new JLabel("Username: ");
         username.setBounds(5, 40, 100, 20);
@@ -55,6 +56,9 @@ public class Register extends JFrame {
 
         registerButton = new JButton("Create account");
         registerButton.setBounds(30, 160, 150, 20);
+
+        goBackButton = new JButton("Go back");
+        goBackButton.setBounds(200, 160, 150, 20);
 
         usernameArea.addKeyListener(new KeyAdapter() { //key listener for tab functionality
             @Override
@@ -100,12 +104,23 @@ public class Register extends JFrame {
             }
         });
 
+        goBackButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                confirmPasswordArea.setText("");
+                passwordArea.setText("");
+                dispose();
+                LoginArea loginArea = new LoginArea();
+            }
+        });
+
         add(username); //adding all components to the JFrame
         add(usernameArea);
         add(password);
         add(passwordArea);
         add(loginLabel);
         add(registerButton);
+        add(goBackButton);
         add(confirmPassword);
         add(confirmPasswordArea);
         pack();
@@ -117,7 +132,7 @@ public class Register extends JFrame {
     }
     private void dupeCheck() { //this method is called after password is checked. This is the check that adds the user into the system.
         boolean isDuplicate = false;
-        String tempPass;
+        String tempUser;
         String username = usernameArea.getText();
         String password = passwordArea.getText();
         Connection con = null;
@@ -130,8 +145,8 @@ public class Register extends JFrame {
             String checkPassStmt = "select * from userinfo;";
             ResultSet rset = stmt.executeQuery(checkPassStmt);
             while (rset.next()) {
-                tempPass = rset.getString("username");
-                if (tempPass.equalsIgnoreCase(usernameArea.getText())) { //checking every username, and returning true if a name already exists in the DB
+                tempUser = rset.getString("username");
+                if (tempUser.equalsIgnoreCase(usernameArea.getText())) { //checking every username, and returning true if a name already exists in the DB
                     isDuplicate = true;
                 }
             }
@@ -142,23 +157,31 @@ public class Register extends JFrame {
                 confirmPasswordArea.setText("");
             }
             if (!isDuplicate) { //not duplicate
-                byte[] salt = getSalt(); //getting the custom salt for this user
-                password = hashPass(salt, password); //hashing user password with custom salt
-                String storeSalt = Base64.getEncoder().encodeToString(salt); //encoding salt in a user friendly format to be stored
-                LoginArea.currentUser = usernameArea.getText();
-                String strStatement = "CREATE TABLE IF NOT EXISTS " + username
-                        + " (Website varchar(50), Username varchar(50), Password varchar(50));"; //creating their own personal table
-                stmt2.execute(strStatement);
+                if (allowedUsername(username)) {
+                    byte[] salt = getSalt(); //getting the custom salt for this user
+                    password = hashPass(salt, password); //hashing user password with custom salt
+                    String storeSalt = Base64.getEncoder().encodeToString(salt); //encoding salt in a user friendly format to be stored
+                    LoginArea.currentUser = usernameArea.getText();
+                    String strStatement = "CREATE TABLE IF NOT EXISTS " + username
+                            + " (Website varchar(50), Username varchar(50), Password varchar(50));"; //creating their own personal table
+                    stmt2.execute(strStatement);
 
-                strStatement = "INSERT INTO userinfo VALUES ('" + username + "', '" + password + "', '" + storeSalt + "');"; //storing login info
-                stmt2.execute(strStatement);
-                usernameArea.setText("");
-                passwordArea.setText("");
-                confirmPasswordArea.setText("");
-                JOptionPane.showMessageDialog(frame, "Your account has been created successfully!" +
-                        " You may now log in."); //success message
-                dispose();
-                LoginArea loginArea = new LoginArea(); //directing user back to login screen after successful account creation
+                    strStatement = "INSERT INTO userinfo VALUES ('" + username + "', '" + password + "', '" + storeSalt + "');"; //storing login info
+                    stmt2.execute(strStatement);
+                    usernameArea.setText("");
+                    passwordArea.setText("");
+                    confirmPasswordArea.setText("");
+                    JOptionPane.showMessageDialog(frame, "Your account has been created successfully!" +
+                            " You may now log in."); //success message
+                    dispose();
+                    LoginArea loginArea = new LoginArea(); //directing user back to login screen after successful account creation
+                }
+                if (!allowedUsername(username)) {
+                    JOptionPane.showMessageDialog(frame, "Invalid username. Please try again.");
+                    usernameArea.setText("");
+                    passwordArea.setText("");
+                    confirmPasswordArea.setText("");
+                }
             }
         } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException throwables) {
             throwables.printStackTrace();
@@ -181,5 +204,16 @@ public class Register extends JFrame {
         random.nextBytes(salt); //generating a random salt that will be used to hash password
 
         return salt;
+    }
+    private boolean allowedUsername(String username) { //checking for SQL injection statements
+        if     (username.toUpperCase().contains("INSERT") ||
+                username.toUpperCase().contains("DELETE") ||
+                username.toUpperCase().contains("SELECT") ||
+                username.toUpperCase().contains("DROP") ||
+                username.toUpperCase().contains("%") ||
+                username.toUpperCase().contains("*")) {
+            return false;
+        }
+        return true;
     }
 }

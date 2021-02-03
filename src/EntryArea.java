@@ -11,7 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-public class theGUI extends JFrame {
+public class EntryArea extends JFrame {
     private static final int WINDOW_WIDTH = 800;
     private static final int WINDOW_HEIGHT = 500;
     private static final String[] column ={"WEBSITE","USERNAME","PASSWORD"};
@@ -21,7 +21,7 @@ public class theGUI extends JFrame {
     private static JTextArea usernameInfo;
     private static JTextArea passwordInfo;
 
-    theGUI() {
+    EntryArea() {
         //database info
         setTitle("Secure Password Storage");
         setLayout(null);
@@ -100,7 +100,7 @@ public class theGUI extends JFrame {
             }
         });
 
-        JTable jt = theGUI.getJt();
+        JTable jt = EntryArea.getJt();
         removeButton.addActionListener((new ActionListener() { //listener to remove entries
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -136,12 +136,12 @@ public class theGUI extends JFrame {
                             "jdbc:mysql://localhost:3306/passwordstore", PasswordDatabase.MYSQL_LOGIN, PasswordDatabase.MYSQL_PASSWORD);
 
                     Statement stmt = con.createStatement();
-                    String strInsert = "insert into " + LoginArea.currentUser + " " + "values ('" + theGUI.websiteInfo.getText()
-                            + "', '" + theGUI.usernameInfo.getText() + "', '" + theGUI.passwordInfo.getText() + "')";
+                    String strInsert = "insert into " + LoginArea.currentUser + " " + "values ('" + EntryArea.websiteInfo.getText()
+                            + "', '" + EntryArea.usernameInfo.getText() + "', '" + EntryArea.passwordInfo.getText() + "')";
                     stmt.executeUpdate(strInsert);
-                    theGUI.websiteInfo.setText("");
-                    theGUI.usernameInfo.setText(""); //retrieves all entries, and sets the field to ""
-                    theGUI.passwordInfo.setText("");
+                    EntryArea.websiteInfo.setText("");
+                    EntryArea.usernameInfo.setText(""); //retrieves all entries, and sets the field to ""
+                    EntryArea.passwordInfo.setText("");
                     DefaultTableModel tableModel1 = new DefaultTableModel(PasswordDatabase.getData(), column) {
                         @Override
                         public boolean isCellEditable(int row, int column) {

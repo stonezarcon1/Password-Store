@@ -124,11 +124,12 @@ public class LoginArea extends JFrame {
                     JOptionPane.showMessageDialog(this, "Your username or password is incorrect.");
                 }
                 if (tempPass.equals(currentPass)) { //successful
-                    theGUI gui = new theGUI(); //directing to the main screen, and uses the current users info
+                    EntryArea gui = new EntryArea(); //directing to the main screen, and uses the current users info
                     dispose();
                     currentPass = "";
                 }
             }
+            con.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -150,7 +151,7 @@ public class LoginArea extends JFrame {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             byte[] hash = factory.generateSecret(spec).getEncoded();
             currentPass = Base64.getEncoder().encodeToString(hash);
-
+            con.close();
         } catch (SQLException | NoSuchAlgorithmException | InvalidKeySpecException throwables) {
             throwables.printStackTrace();
         }
