@@ -5,7 +5,7 @@ A java program that allows you to securely store all of your website loging info
 
 In order to run this program you must have your own personal mysql server set up. 
 Before running you must change the following fields located within class Password Database { :
-MYSQL_LOGIN //change to your mysql username.
+MYSQL_USER //change to your mysql username.
 MYSQL_PASSWORD //change to your mysql password.
 MYSQL_DIRECTORY //change to the directory you want to work out of.
 
